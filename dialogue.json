@@ -1,0 +1,16 @@
+{
+  "dialogue": [
+    {
+      "line": "Do you have a car?"
+    },
+    {
+      "line": "Yes, I do."
+    },
+    {
+      "line": "What kind of car do you have? Is it new? Do you take good care of it?"
+    },
+    {
+      "line": "I have a Honda. It was new in 2003. But it still looks good. I wash it once a week. My mechanic changes the oil twice a year."
+    }
+  ]
+}
