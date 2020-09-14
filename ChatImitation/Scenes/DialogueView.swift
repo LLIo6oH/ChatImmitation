@@ -11,6 +11,9 @@ struct DialogueView: View {
     
     @ObservedObject var dialogViewModel = DialogueViewModel()
     @State var opacity: Double = 0
+    @State var showedMessageIndex = 1
+    
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     private var chatBubble: some View {
         RoundedRectangle(cornerRadius: 5)
@@ -35,7 +38,7 @@ struct DialogueView: View {
     }
     
     var body: some View {
-        let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+        let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
         
         GeometryReader { geometry in
             NavigationView {
@@ -43,49 +46,49 @@ struct DialogueView: View {
                 ZStack {
                     (Color(hex: AppDefaults.AppColors.mainBgColor)).edgesIgnoringSafeArea(.all)
                 
-                    ScrollView {
-                    
-//                        VStack {
-                            
-                            ForEach(dialogViewModel.dialogueLines, id: \.self) { dialogueLine in
-                                
-                                HStack(alignment: .bottom, spacing: 0) {
-                                    chatBubbleTriange(width: 11, height: 18)
+                    VStack {
+                        
+                        ScrollViewReader { scrollProxy in
+                        
+                            ScrollView(.vertical) {
+
+                                ForEach(dialogViewModel.dialogueLines, id: \.self) { dialogueLine in
                                     
-                                    Text(dialogueLine.line)
-                                        .opacity(0)
-//                                        .opacity(opacity)
-                                        .font(.system(size: 17.0, weight: .light))
-                                        .foregroundColor(Color.black)
-                                        .padding(10)
-                                        .background(chatBubble)
-                                        .onAppear() {
-                                            withAnimation(.easeInOut(duration: 0.5), {
-                                                self.opacity = 1
-                                            })
-                                        }
-//                                        .id(dialogueLine.id)
-                                    
-                                    Spacer()
+                                    HStack(alignment: .bottom, spacing: 0) {
+                                        chatBubbleTriange(width: 11, height: 18)
+                                        
+                                        Text(dialogueLine.line)
+                                            .font(.system(size: 17.0, weight: .light))
+                                            .foregroundColor(Color.black)
+                                            .padding(10)
+                                            .background(chatBubble)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.leading, 20)
+                                    .padding(.trailing, geometry.size.width * 0.15)
+                                    .padding(.top, 30)
                                 }
-                                .padding(.leading, 20)
-                                .padding(.trailing, geometry.size.width * 0.15)
-                                .padding(.top, 30)
-//                                .id(dialogueLine.id)
-                            }.onAppear() {
-                                opacity = 0
+                                .padding(.top, geometry.size.height - 100)
+                                .background(Color(hex: AppDefaults.AppColors.mainBgColor))
+                                .navigationBarTitle(Text("Dialogue"), displayMode: .inline)
+                                .onAppear() {
+                                    dialogViewModel.getDialogue()
+                                }
                             }
-                            
-//                        }
-                        .background(Color(hex: AppDefaults.AppColors.mainBgColor))
-                        .navigationBarTitle(Text("Dialogue"), displayMode: .inline)
-                        .onAppear() {
-                            dialogViewModel.getDialogue()
+                            .background(Color(hex: AppDefaults.AppColors.mainBgColor))
+                            .onReceive(timer) { _ in
+                                withAnimation(.easeInOut(duration: 0.5)) {
+                                    if showedMessageIndex < dialogViewModel.dialogueLines.count {
+                                    scrollProxy.scrollTo(dialogViewModel.dialogueLines[showedMessageIndex], anchor: .bottom)
+                                    showedMessageIndex += 1
+                                    } else {
+                                        timer.upstream.connect().cancel()
+                                    }
+                                }
+                            }
                         }
                     }
-                .background(Color(hex: AppDefaults.AppColors.mainBgColor))
-                }.onReceive(timer) { _ in
-                    dialogViewModel.imitationOfChatActivity()
                 }
             }
         }

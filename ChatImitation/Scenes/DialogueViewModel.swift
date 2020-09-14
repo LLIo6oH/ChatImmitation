@@ -18,16 +18,9 @@ class DialogueViewModel: ObservableObject {
     
     func getDialogue() {
         jSonService.readDialogJson { [weak self] (dialogue) in
-            self?.dialogModel = dialogue
+            self?.dialogueLines = dialogue.dialogue
         } failure: { [weak self] (error) in
             self?.error = error.debugDescription
-        }
-    }
-    
-    func imitationOfChatActivity() {
-        if activeLineIndex < dialogModel.dialogue.count  {
-            dialogueLines.append(dialogModel.dialogue[activeLineIndex])
-            activeLineIndex += 1
         }
     }
 }
